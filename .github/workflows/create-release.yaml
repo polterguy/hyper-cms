@@ -1,67 +1,79 @@
-# Builds and deploys the AI Expert system to the Bazar
-
-name: Builds and deploys the AI Expert system to the Bazar
+name: CI and CD for development environment deploy to cloudlet
 on:
   push:
-    branches: [ main ]
+    branches: [ master, main, dev ]
 jobs:
-  build:
+  archive-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Build project
-      run: |
-        npm install
-        npm run build
-
-    - name: Archive
-      if: success()
-      uses: vimtor/action-zip@v1
-      with:
-        files: ./dist/
-        dest: ./${{ github.event.repository.name }}.zip
-
-    - name: Publish
-      if: success()
-      uses: fjogeleit/http-request-action@v1.14.0
-      with:
-        url: 'https://ainiro.io/magic/system/file-system/file'
-        method: 'PUT'
-        timeout: 50000
-        customHeaders: '{
-          "Content-Type": "multipart/form-data",
-          "Authorization": "Bearer ${{ secrets.TOKEN }}"
-          }'
-        data: '{"folder": "/etc/bazar/frontends/"}'
-        files: '{"file": "./${{ github.event.repository.name }}.zip"}'
-
-    - name: Uploading description
-      if: success()
-      uses: fjogeleit/http-request-action@v1.14.0
-      with:
-        url: 'https://ainiro.io/magic/system/file-system/file'
-        method: 'PUT'
-        timeout: 50000
-        customHeaders: '{
-          "Content-Type": "multipart/form-data",
-          "Authorization": "Bearer ${{ secrets.TOKEN }}"
-          }'
-        data: '{"folder": "/etc/bazar/frontends/"}'
-        files: '{"file": "./README.md"}'
-
-    - name: Renaming description file
-      if: success()
-      uses: fjogeleit/http-request-action@v1.14.0
-      with:
-        url: 'https://ainiro.io/magic/system/file-system/rename'
-        method: 'POST'
-        timeout: 50000
-        customHeaders: '{
-          "Content-Type": "application/json",
-          "Authorization": "Bearer ${{ secrets.TOKEN }}"
-          }'
-        data: '{
-          "oldName": "/etc/bazar/frontends/README.md",
-          "newName": "${{ github.event.repository.name }}.md"
-          }'
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Remove files  
+        run: rm -rf .git && rm -rf .github && rm -rf .vscode && rm -rf .gitignore
+      - name: Replace Contact Us URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/magic/modules/hub-api/contact-us"
+          replace: "https://demo-team.us.ainiro.io/magic/modules/hub-api/contact-us"
+          regex: false
+      - name: Replace Share URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/magic/modules/white-label/share-url?url="
+          replace: "https://demo-team.us.ainiro.io/magic/modules/white-label/share-url?url="
+          regex: false
+      - name: Replace gibberish URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/magic/system/misc/gibberish?min=20&max=30"
+          replace: "https://demo-team.us.ainiro.io/magic/system/misc/gibberish?min=20&max=30"
+          regex: false
+      - name: Replace challenge URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/magic/system/misc/magic-captcha-challenge.js"
+          replace: "https://demo-team.us.ainiro.io/magic/system/misc/magic-captcha-challenge.js"
+          regex: false
+      - name: Replace socket URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/sockets"
+          replace: "https://demo-team.us.ainiro.io/sockets"
+          regex: false
+      - name: Replace Share URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/magic/modules/white-label/create-bot"
+          replace: "https://demo-team.us.ainiro.io/magic/modules/white-label/create-bot"
+          regex: false
+      - name: Replace Web GPT URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000/magic/system/openai/query"
+          replace: "https://demo-team.us.ainiro.io/magic/system/openai/query"
+          regex: false
+      - name: Replace API URL
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "http://localhost:5000"
+          replace: "https://ainiro.io/"
+          regex: false
+      - name: Archive
+        if: success()
+        uses: vimtor/action-zip@v1
+        with:
+          files: ./
+          dest: archive.zip
+      - name: Deploy
+        if: success()
+        uses: fjogeleit/http-request-action@v1.14.0
+        with:
+          url: 'http://upload.ainiro.io/magic/system/file-system/overwrite-folder'
+          method: 'PUT'
+          timeout: 120000
+          customHeaders: '{
+            "Content-Type": "multipart/form-data",
+            "Authorization": "Bearer ${{ secrets.TOKEN }}"
+            }'
+          data: '{"folder": "/etc/www/"}'
+          files: '{"file": "/home/runner/work/hyper-cms/hyper-cms/archive.zip"}'
