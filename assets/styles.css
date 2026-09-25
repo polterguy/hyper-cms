@@ -1,0 +1,241 @@
+/*
+ * Pemberton & Vale — the whole look, in one file.
+ *
+ * Everything is driven from the tokens below, so changing the colour of the
+ * site is changing six lines rather than hunting through the pages. The Web
+ * Designer's Style panel writes into the block at the bottom of this file and
+ * leaves everything above it exactly as you wrote it.
+ */
+
+:root {
+  --ink: #1b1b1f;
+  --ink-soft: #55555f;
+  --paper: #fbfaf7;
+  --card: #ffffff;
+  --line: #e4e1da;
+  --accent: #8a6b2f;
+  --accent-soft: #f3ede0;
+  --measure: 68ch;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+a { color: var(--accent); }
+
+h1, h2, h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+}
+
+h1 { font-size: 46px; }
+h2 { font-size: 30px; }
+h3 { font-size: 21px; }
+
+p { margin: 0 0 18px; max-width: var(--measure); }
+
+/* -- Header ---------------------------------------------------------------- */
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  min-height: 72px;
+}
+
+.brand {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand span { color: var(--accent); }
+
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 28px;
+}
+
+.site-nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 15px;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+
+.site-nav a:hover { color: var(--ink); }
+
+/*
+ * Which link is the page you are on. The navbar is one file shared by every
+ * page, so it cannot know — the page tells it, as one attribute, and these
+ * three rules do the rest. No JavaScript, and nothing to keep in sync.
+ */
+.site-header[data-current="home"] [data-page="home"],
+.site-header[data-current="about"] [data-page="about"],
+.site-header[data-current="blog"] [data-page="blog"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* -- Sections -------------------------------------------------------------- */
+
+.hero {
+  padding: 84px 0 64px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.lead { font-size: 20px; color: var(--ink-soft); }
+
+.section { padding: 64px 0; }
+
+.section + .section { border-top: 1px solid var(--line); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 26px;
+}
+
+.card h3 { margin-bottom: 8px; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 16px; }
+
+.btn {
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.note {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  padding: 18px 22px;
+  border-radius: 0 8px 8px 0;
+  max-width: var(--measure);
+}
+
+.note p:last-child { margin: 0; }
+
+/* -- Blog ------------------------------------------------------------------ */
+
+.article-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 26px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.article-card:hover { border-color: var(--accent); }
+
+.article-card h3 { margin-bottom: 6px; }
+.article-card .date { font-size: 13px; color: var(--ink-soft); }
+.article-card p { margin: 10px 0 0; color: var(--ink-soft); font-size: 16px; }
+
+.article { padding: 64px 0; }
+.article-body { max-width: var(--measure); }
+.article-body img { max-width: 100%; height: auto; border-radius: 8px; }
+.article-body blockquote {
+  margin: 24px 0;
+  padding-left: 20px;
+  border-left: 3px solid var(--line);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.article-body pre {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  overflow: auto;
+}
+
+/* -- Footer ---------------------------------------------------------------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: var(--card);
+  padding: 36px 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.site-footer .container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.site-footer nav {
+  margin-left: auto;
+  display: flex;
+  gap: 20px;
+}
+
+.site-footer a { color: var(--ink-soft); text-decoration: none; }
+.site-footer a:hover { color: var(--ink); }
+
+@media (max-width: 640px) {
+  h1 { font-size: 34px; }
+  .site-header .container { flex-wrap: wrap; gap: 16px; }
+  .site-nav { margin-left: 0; gap: 20px; }
+  .hero { padding: 56px 0 44px; }
+}

@@ -1,0 +1,32 @@
+/*
+ * Code behind for one Field Note.
+ *
+ * Two files serve this page and they are reached differently, which is worth
+ * knowing before you add a third page:
+ *
+ *   {{*/.name}}  finds a node in THIS file, the page's own code behind.
+ *   {{@.name}}   finds a node in "interceptor.hl" next door.
+ *
+ * Neither form reaches the other file, so which one a page uses says where
+ * the value comes from. The furniture every page has lives here; the work of
+ * finding the article lives in the interceptor, because a code behind file is
+ * not executed — its nodes are only invoked, one at a time, by the
+ * expressions that name them.
+ *
+ * This file also has to exist. An HTML file with no code behind beside it is
+ * served as a flat static file, interceptor or no interceptor, and every
+ * expression in it would be shown to the reader as text.
+ */
+
+.navbar
+   io.file.mixin:/etc/www/.components/navbar.html
+      current:blog
+   return:x:-
+
+.footer
+   date.now
+   date.format:x:-
+      format:yyyy
+   io.file.mixin:/etc/www/.components/footer.html
+      year:x:@date.format
+   return:x:-

@@ -1,0 +1,22 @@
+/*
+ * Code behind for the front page.
+ *
+ * Every {{expression}} in index.html is replaced by whatever the node it
+ * names returns. Both of the nodes below pull in a file from ".components/",
+ * which is how one navigation bar serves every page on the site.
+ */
+
+// The navigation bar, told which page it sits on so it can mark that link.
+.navbar
+   io.file.mixin:/etc/www/.components/navbar.html
+      current:home
+   return:x:-
+
+// The footer, with this year's number in it.
+.footer
+   date.now
+   date.format:x:-
+      format:yyyy
+   io.file.mixin:/etc/www/.components/footer.html
+      year:x:@date.format
+   return:x:-

@@ -1,0 +1,84 @@
+/*
+ * Code behind for the Field Notes listing.
+ *
+ * Articles are Markdown files in "/etc/www/.blog/", named
+ * "YYYY-MM-DD-slug.md". The date in the name is what orders them and the slug
+ * is the address the article is served at, so adding an article is writing a
+ * file — there is no index to update and nothing to register.
+ */
+
+.navbar
+   io.file.mixin:/etc/www/.components/navbar.html
+      current:blog
+   return:x:-
+
+.footer
+   date.now
+   date.format:x:-
+      format:yyyy
+   io.file.mixin:/etc/www/.components/footer.html
+      year:x:@date.format
+   return:x:-
+
+/*
+ * One card per article, newest first.
+ */
+.articles
+   .result
+   io.file.list:/etc/www/.blog/
+
+   /*
+    * Files come back in alphabetical order and they are named by date, so
+    * reversing the list is the whole of "newest first".
+    */
+   .newest-first
+   while
+      exists:x:@io.file.list/0
+      .lambda
+         add:x:@.newest-first
+            get-nodes:x:@io.file.list/0/-
+         remove-nodes:x:@io.file.list/0/-
+
+   for-each:x:@.newest-first/*
+      .name
+      .slug
+      .url
+      .date
+
+      // The file's own name, without the folder in front of it.
+      strings.split:x:@.dp/#
+         .:/
+      set-value:x:@.name
+         get-value:x:@strings.split/0/-
+
+      // "2026-09-20-boats.md" was published on the 20th and is served at /blog/boats.
+      strings.substring:x:@.name
+         .:int:11
+      strings.split:x:@strings.substring
+         .:.
+      set-value:x:@.slug
+         get-value:x:@strings.split/0
+      set-value:x:@.url
+         strings.concat
+            .:/blog/
+            get-value:x:@.slug
+
+      // Front matter comes back as children, the article itself as the value.
+      io.file.load:x:@.dp/#
+      markdown2html:x:@io.file.load
+      convert:x:@markdown2html/*/date
+         type:date
+      set-value:x:@.date
+         date.format:x:@convert
+            format:d MMMM yyyy
+
+      set-value:x:@.result
+         strings.concat
+            get-value:x:@.result
+            io.file.mixin:/etc/www/.components/article-card.html
+               url:x:@.url
+               title:x:@markdown2html/*/title
+               date:x:@.date
+               summary:x:@markdown2html/*/description
+
+   return:x:@.result

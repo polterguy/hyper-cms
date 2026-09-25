@@ -1,0 +1,82 @@
+/*
+ * Finds the article being asked for, and puts its parts where the page can
+ * reach them.
+ *
+ * An interceptor IS executed, top to bottom, before the page it wraps — which
+ * is what makes this the right home for the lookup. The [.interceptor] node at
+ * the end is where the page's own code behind file is spliced in, so its nodes
+ * and these end up side by side and {{*/.title}} finds this one.
+ *
+ * It covers this folder and everything under it. "default.html" answers any
+ * address in here that has no file of its own, so "/blog/anything" arrives
+ * with the last part of the address naming the article.
+ */
+
+// The article's parts, filled in below and read by the page.
+.title
+.date
+.summary
+.content
+
+// The last part of the URL is the article's slug.
+.slug
+request.url
+strings.split:x:@request.url
+   .:/
+set-value:x:@.slug
+   get-value:x:@strings.split/0/-
+
+// The article whose name ends in that slug, if there is one.
+.filename
+io.file.list:/etc/www/.blog/
+for-each:x:@io.file.list/*
+   .name
+   strings.split:x:@.dp/#
+      .:/
+   set-value:x:@.name
+      get-value:x:@strings.split/0/-
+   strings.substring:x:@.name
+      .:int:11
+   strings.split:x:@strings.substring
+      .:.
+   if
+      eq:x:@strings.split/0
+         get-value:x:@.slug
+      .lambda
+         set-value:x:@.filename
+            get-value:x:@.dp/#
+
+/*
+ * A slug nobody wrote an article for still gets a page, because somebody who
+ * mistyped an address deserves a way back rather than a stack trace — but it
+ * gets a 404 status with it. A page that apologises under a 200 is a page
+ * search engines will happily index and then show to someone else.
+ */
+if
+   null:x:@.filename
+   .lambda
+      response.status.set:404
+      set-value:x:@.title
+         .:Not found
+      set-value:x:@.summary
+         .:There is no field note at this address.
+      set-value:x:@.content
+         .:<p>There is no field note at this address. Try the <a href="/blog">list of field notes</a>.</p>
+else
+
+   // Front matter comes back as children, the article itself as the value.
+   io.file.load:x:@.filename
+   markdown2html:x:@io.file.load
+   set-value:x:@.title
+      get-value:x:@markdown2html/*/title
+   set-value:x:@.summary
+      get-value:x:@markdown2html/*/description
+   set-value:x:@.content
+      get-value:x:@markdown2html
+   convert:x:@markdown2html/*/date
+      type:date
+   set-value:x:@.date
+      date.format:x:@convert
+         format:d MMMM yyyy
+
+.interceptor
